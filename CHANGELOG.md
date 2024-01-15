@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.0.2](https://github.com/ncbench/ncbench-workflow/compare/v1.0.1...v1.0.2) (2023-11-14)
+
+
+### Performance Improvements
+
+* update to dna-seq-benchmark 1.8.5 ([#35](https://github.com/ncbench/ncbench-workflow/issues/35)) ([ba713e5](https://github.com/ncbench/ncbench-workflow/commit/ba713e5b4aeb97ed72d77287f6c07a3dd8f09973))
+
+## [1.0.1](https://github.com/ncbench/ncbench-workflow/compare/v1.0.0...v1.0.1) (2023-10-31)
+
+
+### Bug Fixes
+
+* use dna-seq-benchmark 1.8.4, containing a fix for single-callset… ([#31](https://github.com/ncbench/ncbench-workflow/issues/31)) ([c842e43](https://github.com/ncbench/ncbench-workflow/commit/c842e43d28c5f85cc8b95c3c018df14764bc67ae))
+
 ## 1.0.0 (2023-08-21)
 
 
