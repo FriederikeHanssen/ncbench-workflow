@@ -2,7 +2,7 @@ name: PR to ncbench/ncbench-workflow
 # This workflow is triggered on pushes to the repository when the branch starts with a useful prefix.
 
 on:
-  push:
+  create:
     branches:
       - 'sarek_*'
 

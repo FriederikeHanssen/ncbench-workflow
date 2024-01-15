@@ -1,97 +1,97 @@
-name: benchmark
-on:
-  - push
+# name: benchmark
+# on:
+#   - push
 
-jobs:
-  evaluate:
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-    env:
-      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-      ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
-      BENCHMARK_GIAB_NA12878_AGILENT_TOKEN: ${{ secrets.BENCHMARK_GIAB_NA12878_AGILENT_TOKEN }}
-      BO_AGILENT_TOKEN: ${{ secrets.BO_AGILENT_TOKEN }}
-      CO_AGILENT_TOKEN: ${{ secrets.CO_AGILENT_TOKEN }}
-      BO_CORE_UNIT_TOKEN: ${{ secrets.BO_CORE_UNIT_TOKEN }}
-      BENCHMARK_GIAB_NA12878_TWIST_TOKEN: ${{ secrets.BENCHMARK_GIAB_NA12878_TWIST_TOKEN }}
-    steps:
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@v1.3.0
-        with:
-          # this might remove tools that are actually needed,
-          # if set to "true" but frees about 6 GB
-          tool-cache: false
+# jobs:
+#   evaluate:
+#     runs-on: ubuntu-latest
+#     permissions:
+#       actions: write
+#     env:
+#       FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+#       ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
+#       BENCHMARK_GIAB_NA12878_AGILENT_TOKEN: ${{ secrets.BENCHMARK_GIAB_NA12878_AGILENT_TOKEN }}
+#       BO_AGILENT_TOKEN: ${{ secrets.BO_AGILENT_TOKEN }}
+#       CO_AGILENT_TOKEN: ${{ secrets.CO_AGILENT_TOKEN }}
+#       BO_CORE_UNIT_TOKEN: ${{ secrets.BO_CORE_UNIT_TOKEN }}
+#       BENCHMARK_GIAB_NA12878_TWIST_TOKEN: ${{ secrets.BENCHMARK_GIAB_NA12878_TWIST_TOKEN }}
+#     steps:
+#       - name: Free Disk Space (Ubuntu)
+#         uses: jlumbroso/free-disk-space@v1.3.0
+#         with:
+#           # this might remove tools that are actually needed,
+#           # if set to "true" but frees about 6 GB
+#           tool-cache: false
           
-          # all of these default to true, but feel free to set to
-          # "false" if necessary for your workflow
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          swap-storage: true
-          docker-images: false
+#           # all of these default to true, but feel free to set to
+#           # "false" if necessary for your workflow
+#           android: true
+#           dotnet: true
+#           haskell: true
+#           large-packages: true
+#           swap-storage: true
+#           docker-images: false
           
-      - name: Check out repository code
-        uses: actions/checkout@v2
+#       - name: Check out repository code
+#         uses: actions/checkout@v2
 
-      - name: Download reference genome
-        uses: snakemake/snakemake-github-action@v1
-        with:
-          directory: "."
-          snakefile: "workflow/Snakefile"
-          args: "--cores 1 --use-conda --conda-cleanup-pkgs cache resources/reference/genome.fasta"
+#       - name: Download reference genome
+#         uses: snakemake/snakemake-github-action@v1
+#         with:
+#           directory: "."
+#           snakefile: "workflow/Snakefile"
+#           args: "--cores 1 --use-conda --conda-cleanup-pkgs cache resources/reference/genome.fasta"
 
-      - name: Download truthsets
-        uses: snakemake/snakemake-github-action@v1
-        with:
-          directory: "."
-          snakefile: "workflow/Snakefile"
-          args: "--use-conda --cores 1 --conda-cleanup-pkgs cache --until benchmark_get_truth"
+#       - name: Download truthsets
+#         uses: snakemake/snakemake-github-action@v1
+#         with:
+#           directory: "."
+#           snakefile: "workflow/Snakefile"
+#           args: "--use-conda --cores 1 --conda-cleanup-pkgs cache --until benchmark_get_truth"
 
-      # This step is necessary (after downloading the truthsets above) to ensure
-      # that the files coming from the git repo are not triggering reruns
-      # because their modification dates are too new or too old.
-      # (as git does not preserve modification dates)
-      - name: Fix modification dates
-        uses: snakemake/snakemake-github-action@v1
-        with:
-          directory: "."
-          snakefile: "workflow/Snakefile"
-          args: "--cores 1 --touch resources/regions/*/test-regions.cov-*.bed"
+#       # This step is necessary (after downloading the truthsets above) to ensure
+#       # that the files coming from the git repo are not triggering reruns
+#       # because their modification dates are too new or too old.
+#       # (as git does not preserve modification dates)
+#       - name: Fix modification dates
+#         uses: snakemake/snakemake-github-action@v1
+#         with:
+#           directory: "."
+#           snakefile: "workflow/Snakefile"
+#           args: "--cores 1 --touch resources/regions/*/test-regions.cov-*.bed"
 
-      - name: Run analysis
-        uses: snakemake/snakemake-github-action@v1
-        with:
-          directory: "."
-          snakefile: "workflow/Snakefile"
-          args: >
-            --cores 1 --use-conda --conda-cleanup-pkgs cache
+#       - name: Run analysis
+#         uses: snakemake/snakemake-github-action@v1
+#         with:
+#           directory: "."
+#           snakefile: "workflow/Snakefile"
+#           args: >
+#             --cores 1 --use-conda --conda-cleanup-pkgs cache
 
-      - name: Create report
-        uses: snakemake/snakemake-github-action@v1
-        with:
-          directory: "."
-          snakefile: "workflow/Snakefile"
-          args: "--report report.zip"
+#       - name: Create report
+#         uses: snakemake/snakemake-github-action@v1
+#         with:
+#           directory: "."
+#           snakefile: "workflow/Snakefile"
+#           args: "--report report.zip"
 
-      - name: Upload report as artifact
+#       - name: Upload report as artifact
 
-        uses: actions/upload-artifact@v3
-        with:
-          name: report
-          path: report.zip
+#         uses: actions/upload-artifact@v3
+#         with:
+#           name: report
+#           path: report.zip
 
-      - uses: 8BitJonny/gh-get-current-pr@2.2.0
-        id: pr
-        with:
-          sha: ${{ github.event.pull_request.head.sha }}
-          filterOutClosed: true
+#       - uses: 8BitJonny/gh-get-current-pr@2.2.0
+#         id: pr
+#         with:
+#           sha: ${{ github.event.pull_request.head.sha }}
+#           filterOutClosed: true
 
-      - name: Trigger homepage build
-        if: ${{ (steps.pr.outputs.pr_found != 'true') && (github.ref == 'main') }}
-        uses: benc-uk/workflow-dispatch@v1
-        with:
-          workflow: deploy-page
-          repo: ncbench/ncbench.github.io
-          token: ${{ secrets.WORKFLOW_DISPATCH_TOKEN }}
+#       - name: Trigger homepage build
+#         if: ${{ (steps.pr.outputs.pr_found != 'true') && (github.ref == 'main') }}
+#         uses: benc-uk/workflow-dispatch@v1
+#         with:
+#           workflow: deploy-page
+#           repo: ncbench/ncbench.github.io
+#           token: ${{ secrets.WORKFLOW_DISPATCH_TOKEN }}
